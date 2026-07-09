@@ -64,17 +64,24 @@ if not exist zmusic git clone https://github.com/zdoom/zmusic
 if not exist "%~dp0\build\zmusic\build" mkdir "%~dp0\build\zmusic\build"
 if not exist "%~dp0\build\vcpkg_installed" mkdir "%~dp0\build\vcpkg_installed"
 
+:: We need a custom-port folder to fix an issue with zmusic and vcpkg in cmake 4.
+set "ABS_OVERLAY_PATH=%CD%\..\custom-ports"
+
+:: Build ZMusic dependencies
 cmake -A x64 -S ./zmusic -B ./zmusic/build ^
 	-DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ^
 	-DVCPKG_LIBSNDFILE=1 ^
-	-DVCPKG_INSTALLLED_DIR=../vcpkg_installed/
+	-DVCPKG_INSTALLLED_DIR=../vcpkg_installed/ ^
+	-DVCPKG_OVERLAY_PORTS="%ABS_OVERLAY_PATH%"
 cmake --build ./zmusic/build --config Release -- -maxcpucount -verbosity:minimal
 
+:: Build Duke
 cmake -A x64 -S .. -B . ^
 	-DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake ^
 	-DZMUSIC_INCLUDE_DIR=./zmusic/include ^
 	-DZMUSIC_LIBRARIES=./zmusic/build/source/Release/zmusiclite.lib ^
-	-DVCPKG_INSTALLLED_DIR=./vcpkg_installed/
+	-DVCPKG_INSTALLLED_DIR=./vcpkg_installed/ ^
+	-DVCPKG_OVERLAY_PORTS="%ABS_OVERLAY_PATH%"
 cmake --build . --config RelWithDebInfo -- -maxcpucount -verbosity:minimal
 
 rem -- If successful, show the build

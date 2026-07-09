@@ -1,5 +1,10 @@
 cmake_minimum_required( VERSION 3.16 )
 
+# Automatically pass the custom ports directory to vcpkg
+if(NOT DEFINED VCPKG_OVERLAY_PORTS)
+    set(VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/custom-ports" CACHE STRING "" FORCE)
+endif()
+
 if( COMMAND cmake_policy )
 	if( POLICY CMP0011 )
 		cmake_policy( SET CMP0011 NEW )
